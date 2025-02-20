@@ -1,9 +1,16 @@
 const canvas = document.getElementById('JogoCanvas');
 const ctx = canvas.getContext('2d');
+let gravidade = 0.5
 
 document.addEventListener("click", (e) => {
     if(gameOver==true){
         location.reload()
+    }
+})
+document,addEventListener('keypress', (e) =>{
+    if(e.code = 'Space' && personagem.pulando === false){
+        personagem.velocidadey = -15
+        personagem.pulando = true
     }
 })
 
@@ -13,7 +20,9 @@ const personagem = {
     posx:50,
     posy:canvas.height-50,
     largura:50,
-    altura:50
+    altura:50,
+    velocidadey:0,
+    pulando: false
 }
 
 function desenhaPersonagem(){
@@ -21,7 +30,7 @@ function desenhaPersonagem(){
     ctx.fillRect(personagem.posx,
         personagem.posy,
         personagem.largura,
-        personagem.altura)
+        personagem.altura,)
 }
 
 const obstaculo = {
@@ -44,6 +53,20 @@ function desenhaObstaculo(){
 
 function atualizaObstaculo(){
     obstaculo.posx -= obstaculo.velocidade
+    if(obstaculo.posx + obstaculo.tamx <= 0){
+        altura_random = (Math.random() * 50) + 90
+        obstaculo.posx = canvas.width;
+        obstaculo.tamy = altura_random;
+        obstaculo.posy = canvas.height - altura_random;
+        obstaculo.velocidade += 0.5;
+    }
+}
+
+function atualizaPersonagem(){
+    if(personagem.pulando == true){
+        personagem.velocidadey += gravidade
+        personagem.posy += personagem.velocidadey
+    }
 }
 
 function verificaColisao() {
@@ -57,6 +80,14 @@ function verificaColisao() {
     }
 }
 
+function verificaChao(){
+    if(personagem.posy >= canvas.height - personagem.altura){
+        personagem.posy = canvas.height - personagem.altura;
+        personagem.velocidadey = 0;
+        personagem.pulando = false;
+    }
+}
+
 function houveColisao(){
     obstaculo.velocidade = 0
     atualizaObstaculo()
@@ -66,16 +97,22 @@ function houveColisao(){
     ctx.font = '50px Arial'
     ctx.fillText("GAME OVER", (canvas.width/2)-150, (canvas.height/2)+20)
     gameOver = true
+    document.addEventListener('keydown', (e) =>{
+        if(e.code === 'Space'){
+            event.preventDefault()
+        }
+    })
     
 }
 
 function loop(){
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    verificaColisao
     desenhaObstaculo()
     desenhaPersonagem()
     atualizaObstaculo()
+    atualizaPersonagem()
     verificaColisao()
+    verificaChao()
     requestAnimationFrame(loop)
 }
 
